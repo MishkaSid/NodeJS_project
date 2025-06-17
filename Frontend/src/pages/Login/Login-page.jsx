@@ -57,17 +57,40 @@ function LoginPage() {
       <div className={classes.background}></div>
       <div className={classes.homepage}>
         <div className={classes.logos}>
-          <img className={classes.logo} src="src/assets/images/logoBeta.PNG" alt="logo" />
-          <img className={classes.schoolLogo} src="https://www.pet.ac.il/images/logo.png" alt="logo" />
+          <img
+            className={classes.logo}
+            src="src/assets/images/logoBeta.PNG"
+            alt="logo"
+          />
+          <img
+            className={classes.schoolLogo}
+            src="https://www.pet.ac.il/images/logo.png"
+            alt="logo"
+          />
         </div>
         <div className={classes.welcome}>
-          <p>ברוכים הבאים לפלטפורמת "מוכנים ובגדול"!... התחילו כבר עכשיו...</p>
+          <p>
+            ברוכים הבאים למוכנים ובגדול המערכת התרגול למבחני הכניסה לבית הספר
+            הארצי להנדסאים בקריית הטכניון
+          </p>
         </div>
         <div className={classes.login}>
           <h1>כניסה</h1>
           <form onSubmit={handleLogin}>
-            <input type="email" placeholder="אימייל" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <input type="password" placeholder="סיסמה" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input
+              type="email"
+              placeholder="אימייל"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="סיסמה"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
             <button type="submit">התחבר</button>
           </form>
           <div className={classes.warning}>
@@ -75,7 +98,12 @@ function LoginPage() {
           </div>
         </div>
       </div>
-      <Popup header="שגיאה בהתחברות" text="שם המשתמש ו/או הסיסמה שגוים" isOpen={showPopup} onClose={() => setShowPopup(false)}>
+      <Popup
+        header="שגיאה בהתחברות"
+        text="שם המשתמש ו/או הסיסמה שגוים"
+        isOpen={showPopup}
+        onClose={() => setShowPopup(false)}
+      >
         <div className={classes.popupContent}>
           <p>שגיאה בהתחברות</p>
         </div>

@@ -6,8 +6,6 @@ import LoginPage from "../pages/Login/Login-page";
 import ManagerDashboard from "../pages/manager/home/Manager";
 import UserPermissions from "../pages/manager/permissions/UserPermissions";
 import ManageContent from "../pages/manager/manageContent/ManageContent";
-import TeacherDashboard from "../pages/teacher/Teacher";
-import StudentDashboard from "../pages/student/dashboard/Student";
 import UnauthorizedPage from "../pages/unauthorize/Unauthorize";
 import NotFound from "../pages/not found/NotFound";
 
@@ -35,8 +33,6 @@ function App() {
                 path="/manager/manageContent"
                 element={<ManageContent />}
               />
-              <Route path="/teacher" element={<TeacherDashboard />} />
-              <Route path="/student" element={<StudentDashboard />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFound />} />
