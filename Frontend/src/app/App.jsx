@@ -1,43 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "../context/AuthContext";
-import Layout from "./Layout";
-import ProtectedRoute from "./ProtectedRoute";
-import LoginPage from "../pages/Login/Login-page";
-import ManagerDashboard from "../pages/manager/home/Manager";
-import UserPermissions from "../pages/manager/permissions/UserPermissions";
-import ManageContent from "../pages/manager/manageContent/ManageContent";
-import UnauthorizedPage from "../pages/unauthorize/Unauthorize";
-import NotFound from "../pages/not found/NotFound";
+import Router from "./Router";
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/unauthorized" element={<UnauthorizedPage />} />
-          {/* Protected Routes */}
-          <Route
-            element={
-              <ProtectedRoute allowedRoles={["Admin", "Teacher", "Examinee"]} />
-            }
-          >
-            {/* Layout section */}
-            <Route element={<Layout />}>
-              <Route path="/manager" element={<ManagerDashboard />} />
-              <Route
-                path="/manager/permissions"
-                element={<UserPermissions />}
-              />
-              <Route
-                path="/manager/manageContent"
-                element={<ManageContent />}
-              />
-            </Route>
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+      <Router />
     </AuthProvider>
   );
 }

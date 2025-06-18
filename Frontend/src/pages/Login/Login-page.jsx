@@ -1,39 +1,35 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import axios from "axios";
 import classes from "./login.module.css";
 import Popup from "../../components/popup/Popup";
-import { useAuth } from "../../context/AuthContext"; // ✅ import auth hook
+import { useAuth } from "../../context/AuthContext";
+import { navigate } from "../../app/navigate"; // 👈 custom navigation function
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPopup, setShowPopup] = useState(false);
 
-  const { login, user } = useAuth(); // ✅ use login() and user from context
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const response = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password,
+      });
 
       const { token } = response.data;
 
       // ✅ Save token via AuthContext
       login(token);
 
-      // ✅ Decode token locally (optional, safer to wait for context update)
-      const payload = JSON.parse(atob(token.split(".")[1])); // decode payload
+      // ✅ Decode token to determine role
+      const payload = JSON.parse(atob(token.split(".")[1]));
       const role = payload.role;
 
-      // ✅ Navigate by role
+      // ✅ Navigate by role using custom function
       switch (role) {
         case "Admin":
           navigate("/manager");
@@ -65,12 +61,12 @@ function LoginPage() {
           <img
             className={classes.schoolLogo}
             src="https://www.pet.ac.il/images/logo.png"
-            alt="logo"
+            alt="school-logo"
           />
         </div>
         <div className={classes.welcome}>
           <p>
-            ברוכים הבאים למוכנים ובגדול המערכת התרגול למבחני הכניסה לבית הספר
+            ברוכים הבאים למוכנים ובגדול – המערכת לתרגול מבחני הכניסה לבית הספר
             הארצי להנדסאים בקריית הטכניון
           </p>
         </div>
@@ -100,7 +96,7 @@ function LoginPage() {
       </div>
       <Popup
         header="שגיאה בהתחברות"
-        text="שם המשתמש ו/או הסיסמה שגוים"
+        text="שם המשתמש ו/או הסיסמה שגויים"
         isOpen={showPopup}
         onClose={() => setShowPopup(false)}
       >

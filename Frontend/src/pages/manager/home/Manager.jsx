@@ -1,8 +1,5 @@
 import "../../pages.css";
 import styles from "./manager.module.css";
-import GradesDistributionChart from "../../../components/charts/GradeDistributionChart";
-import QuestionStatsChart from "../../../components/charts/QuestionStatsChart";
-import StudentUsageChart from "../../../components/charts/StudentUsageChart";
 import Welcome from "../../../components/welcome/Welcome";
 
 /**
@@ -24,9 +21,9 @@ function Manager() {
         <div className={styles.background} />
         <div className={styles.managerPage}>
           <div className={styles.chartsGrid}>
-            <QuestionStatsChart />
-            <StudentUsageChart />
-            <GradesDistributionChart />
+            <p>
+              this is manager page which will contain charts of statistics in various fields
+            </p>
           </div>
         </div>
       </Welcome>

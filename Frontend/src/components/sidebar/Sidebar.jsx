@@ -1,27 +1,22 @@
-import { Link , useNavigate } from "react-router-dom";
 import { FiUsers, FiHome, FiBookOpen, FiBook, FiMenu, FiLogOut } from "react-icons/fi";
 import styles from "./sidebar.module.css";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { navigate } from "../../app/navigate"; // Custom navigation function
+
 /**
- * Sidebar component for navigation.
+ * Sidebar component for navigation without react-router.
  *
- * This component renders a sidebar with navigation links based on the user type.
- * It can be toggled between expanded and collapsed states.
+ * Renders links based on the user's role and handles logout and route navigation.
  *
- * @param {Object} props - Component properties.
- * @param {boolean} props.isOpen - Whether the sidebar is open.
- * @param {function} props.setIsOpen - Function to toggle the open state of the sidebar.
- * @param {string} [props.userType="guest"] - The type of user to determine which menu items to render.
- *
- * @returns {JSX.Element} The rendered sidebar component.
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Whether the sidebar is expanded or collapsed.
+ * @param {function} props.setIsOpen - Toggle function for sidebar expansion.
+ * @param {string} [props.userType="guest"] - Determines which links to show.
+ * @returns {JSX.Element}
  */
-
 function Sidebar({ isOpen, setIsOpen, userType = "guest" }) {
-  
   const { logout } = useAuth();
-  const navigate = useNavigate();
-
   const [expanded, setExpanded] = useState(isOpen);
 
   const menuItems = {
@@ -41,31 +36,41 @@ function Sidebar({ isOpen, setIsOpen, userType = "guest" }) {
     guest: []
   };
 
-  function hadleLogout() {
+  function handleLogout() {
     logout();
     navigate("/");
   }
 
   return (
     <div className={`${styles.sidebar} ${expanded ? styles.expanded : styles.collapsed}`}>
-      <button className={styles.menuToggle} onClick={() => {
-        setIsOpen(!isOpen);
-        setExpanded(!expanded);
-      }}>
+      <button
+        className={styles.menuToggle}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          setExpanded(!expanded);
+        }}
+      >
         <FiMenu size={30} />
       </button>
 
       <ul className={styles.navLinks}>
         {(menuItems[userType] || []).map((item, index) => (
           <li key={index}>
-            <Link to={item.to}>
+            <a
+              href={item.to}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(item.to);
+              }}
+            >
               {item.icon}
               {expanded && <span>{item.label}</span>}
-            </Link>
+            </a>
           </li>
         ))}
       </ul>
-      <button className={styles.logoutButton} onClick={hadleLogout}>
+
+      <button className={styles.logoutButton} onClick={handleLogout}>
         <FiLogOut size={30} />
         {expanded && <span>התנתק/י</span>}
       </button>
@@ -74,4 +79,3 @@ function Sidebar({ isOpen, setIsOpen, userType = "guest" }) {
 }
 
 export default Sidebar;
-
