@@ -32,12 +32,17 @@
 
 /* charts Grid */
 .chartsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
-  gap: 24px;
-  width: 100%;
-  margin-top: 16px;
-  padding: 8px;
+  display: block;
+  background: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  border-radius: 10px;
+  align-items: center;
+}
+
+.chartsGrid p{
+  color: black;
+  margin: 1rem 0;
 }
 
 
