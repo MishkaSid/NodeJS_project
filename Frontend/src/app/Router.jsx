@@ -7,7 +7,6 @@ import UnauthorizedPage from "../pages/unauthorize/Unauthorize";
 import NotFound from "../pages/not found/NotFound";
 import Layout from "./Layout";
 import { useAuth } from "../context/AuthContext";
-import { navigate } from "./navigate";
 
 
 const Router = () => {

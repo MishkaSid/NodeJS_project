@@ -15,6 +15,7 @@ import { navigate } from "../../app/navigate"; // Custom navigation function
  * @param {string} [props.userType="guest"] - Determines which links to show.
  * @returns {JSX.Element}
  */
+
 function Sidebar({ isOpen, setIsOpen, userType = "guest" }) {
   const { logout } = useAuth();
   const [expanded, setExpanded] = useState(isOpen);

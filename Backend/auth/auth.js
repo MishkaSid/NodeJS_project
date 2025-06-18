@@ -39,6 +39,7 @@ router.post('/login', async (req, res) => {
       JWT_SECRET,
       { expiresIn: '2h' }
     );
+    console.log('Generated JWT:', token);
 
     // Send token and user info to the client
     const userInfo = { id: user.UserId, email: user.Email, name: user.Name, role: user.Role };

@@ -14,7 +14,8 @@ import Welcome from "../../../components/welcome/Welcome";
 function Manager() {
 
   const userToken = localStorage.getItem("user");
-
+  console.log(userToken);
+  console.log(JSON.parse(userToken).name);
   return (
     <div className={styles.adminPage}>
       <Welcome user={{ username:JSON.parse(userToken).name}}>
@@ -22,7 +23,7 @@ function Manager() {
         <div className={styles.managerPage}>
           <div className={styles.chartsGrid}>
             <p>
-              this is manager page which will contain charts of statistics in various fields
+              this is manager page which will contain charts of statistics in various fields  
             </p>
           </div>
         </div>
