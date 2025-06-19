@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import styles from "../adminPages.module.css";
 import Upload from "../../../components/upload/UploadStudentTable";
 import axios from "axios";
-import Form from "../../../components/form/Form";
 import Popup from "../../../components/popup/Popup";
+import UserForm from "../../../components/form/UserForm";
 
 export default function UserPermissions() {
   const [users, setUsers] = useState([]);
@@ -161,45 +161,6 @@ export default function UserPermissions() {
       });
   }
 
-  const formInputs = [
-    {
-      label: "ת.ז",
-      type: "text",
-      name: "UserID",
-      value: formData.UserID,
-      onChange: (e) => setFormData({ ...formData, UserID: e.target.value }),
-    },
-    {
-      label: "שם",
-      type: "text",
-      name: "Name",
-      value: formData.Name,
-      onChange: (e) => setFormData({ ...formData, Name: e.target.value }),
-    },
-    {
-      label: "אימייל",
-      type: "email",
-      name: "Email",
-      value: formData.Email,
-      onChange: (e) => setFormData({ ...formData, Email: e.target.value }),
-    },
-    {
-      label: "סיסמה",
-      type: "text",
-      name: "Password",
-      value: formData.Password,
-      onChange: (e) => setFormData({ ...formData, Password: e.target.value }),
-    },
-    {
-      label: "תפקיד",
-      type: "select",
-      name: "Role",
-      value: formData.Role,
-      onChange: (e) => setFormData({ ...formData, Role: e.target.value }),
-      options: ["Admin", "Teacher", "Examinee"],
-    },
-  ];
-
   return (
     <>
       <div className={styles.adminPage}>
@@ -277,13 +238,16 @@ export default function UserPermissions() {
       </div>
       {isFormOpen && (
         <Popup isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
-          <Form
-            inputs={
-              isEditMode
-                ? formInputs.filter((input) => input.name !== "Password")
-                : formInputs
-            }
+          <UserForm
+            mode={isEditMode ? "edit" : "add"}
+            initialValues={formData}
             onSubmit={handleSubmitUser}
+            onValidationError={(msg) => setPopupConfig({
+              title: "שגיאה",
+              message: msg,
+              confirmLabel: "סגור",
+              onConfirm: () => setPopupConfig(null),
+            })}
           />
           {isEditMode && (
             <div className={styles.note}>

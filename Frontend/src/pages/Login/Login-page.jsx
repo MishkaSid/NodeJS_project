@@ -3,37 +3,24 @@ import axios from "axios";
 import classes from "./login.module.css";
 import Popup from "../../components/popup/Popup";
 import { useAuth } from "../../context/AuthContext";
-import { navigate } from "../../app/navigate"; // 👈 custom navigation function
+import { navigate } from "../../app/navigate";
+import UserForm from "../../components/form/UserForm";
 
 function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [loginErrorMessage, setLoginErrorMessage] = useState("");
-
   const { login } = useAuth();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async ({ email, password }) => {
     try {
       const response = await axios.post(
         "http://localhost:5000/api/auth/login",
-        {
-          email,
-          password,
-        }
+        { email, password }
       );
-
       const { token } = response.data;
-
-      // ✅ Save token via AuthContext
       login(token);
-
-      // ✅ Decode token to determine role
       const payload = JSON.parse(atob(token.split(".")[1]));
       const role = payload.role;
-
-      // ✅ Navigate by role using custom function
       switch (role) {
         case "Admin":
           navigate("/manager");
@@ -49,7 +36,7 @@ function LoginPage() {
       }
     } catch (error) {
       const message =
-         error.response?.data?.message || "אירעה שגיאה כללית בעת ההתחברות.";
+        error.response?.data?.message || "אירעה שגיאה כללית בעת ההתחברות.";
       setLoginErrorMessage(message);
       setShowPopup(true);
     }
@@ -79,23 +66,15 @@ function LoginPage() {
         </div>
         <div className={classes.login}>
           <h1>כניסה</h1>
-          <form onSubmit={handleLogin}>
-            <input
-              type="email"
-              placeholder="אימייל"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              placeholder="סיסמה"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button type="submit">התחבר</button>
-          </form>
+          <UserForm
+            mode="login"
+            onSubmit={handleLogin}
+            onValidationError={(msg) => {
+              setLoginErrorMessage(msg);
+              setShowPopup(true);
+            }}
+            className={`${classes.form} ${classes.loginForm}`}
+          />
           <div className={classes.warning}>
             <p>שימו לב! פלטפורמה זו הינה כלי עזר ואינה תחליף ללמידה עצמית</p>
           </div>

@@ -85,7 +85,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  max-width: 500px;
+  max-width: 800px;
 }
 
 .login h1 {
@@ -219,5 +219,85 @@ button:hover {
 
   .warning p {
     font-size: 1.3rem;
+  }
+}
+
+.loginForm {
+  background: linear-gradient(135deg, #f8fafc 60%, #e3e8f0 100%);
+  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18), 0 1.5px 8px rgba(44, 62, 80, 0.10);
+  border: 1.5px solid #e0e7ef;
+  border-radius: 1.2rem;
+  padding: 3rem 3rem 2.5rem 3rem;
+  margin-bottom: 2.5rem;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.2s;
+}
+
+.loginForm .inputContainer {
+  margin-bottom: 1.8rem;
+}
+
+.loginForm .label {
+  font-size: 1.25rem;
+  color: #2d3a4a;
+  margin-bottom: 0.4rem;
+}
+
+.loginForm .input {
+  padding: 1.1rem;
+  font-size: 1.15rem;
+  border-radius: 0.7rem;
+  border: 1.5px solid #cfd8dc;
+  background: #f9fbfd;
+  box-shadow: 0 1.5px 6px rgba(44, 62, 80, 0.07);
+  margin-bottom: 0.2rem;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.loginForm .input:focus {
+  border: 1.5px solid #4f8cff;
+  box-shadow: 0 0 8px #4f8cff33;
+}
+
+.loginForm .submitButton {
+  margin-top: 1.2rem;
+  padding: 0.9rem 0;
+  font-size: 1.2rem;
+  border-radius: 0.7rem;
+  background: linear-gradient(90deg, #4f8cff 60%, #3b82f6 100%);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.10);
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.loginForm .submitButton:hover {
+  background: linear-gradient(90deg, #3b82f6 60%, #4f8cff 100%);
+  box-shadow: 0 4px 16px #4f8cff33;
+}
+
+.login .warning {
+  margin-top: 2.5rem;
+}
+
+@media (max-width: 480px) {
+  .loginForm {
+    max-width: 98vw;
+    padding: 1.2rem 0.7rem 1.2rem 0.7rem;
+  }
+  .loginForm .input {
+    font-size: 1rem;
+    padding: 0.8rem;
+  }
+  .loginForm .submitButton {
+    font-size: 1rem;
+    padding: 0.7rem 0;
   }
 }
