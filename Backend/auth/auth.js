@@ -15,7 +15,6 @@ router.post('/login', async (req, res) => {
   try {
     // Connect to the database
     const connection = await db.getConnection();
-    console.log('Connected to database');
 
     // Check if user exists in the database
     const [rows] = await connection.query('SELECT * FROM users WHERE Email = ?', [email]);
@@ -23,14 +22,16 @@ router.post('/login', async (req, res) => {
 
     // If user doesn't exist, return error
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      console.log('⛔ User not found ');
+      return res.status(401).json({ message: 'משתמש לא נמצא' });
     }
 
     // Compare provided password with stored hashed password
     const isMatch = await bcrypt.compare(password, user.Password);
     console.log('Password match:', isMatch);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid password' });
+      console.log('⛔ Invalid password');
+      return res.status(401).json({ message: 'סיסמה לא תקינה' });
     }
 
     // Generate a JWT for the authenticated user

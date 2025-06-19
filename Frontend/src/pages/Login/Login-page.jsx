@@ -9,16 +9,20 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+  const [loginErrorMessage, setLoginErrorMessage] = useState("");
 
   const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
 
       const { token } = response.data;
 
@@ -44,6 +48,9 @@ function LoginPage() {
           navigate("/not-found");
       }
     } catch (error) {
+      const message =
+         error.response?.data?.message || "אירעה שגיאה כללית בעת ההתחברות.";
+      setLoginErrorMessage(message);
       setShowPopup(true);
     }
   };
@@ -96,12 +103,11 @@ function LoginPage() {
       </div>
       <Popup
         header="שגיאה בהתחברות"
-        text="שם המשתמש ו/או הסיסמה שגויים"
         isOpen={showPopup}
         onClose={() => setShowPopup(false)}
       >
         <div className={classes.popupContent}>
-          <p>שגיאה בהתחברות</p>
+          <p style={{ color: "black" }}>{loginErrorMessage}</p>
         </div>
       </Popup>
     </div>
