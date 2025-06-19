@@ -32,17 +32,22 @@
 
 /* charts Grid */
 .chartsGrid {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: white;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
+  padding: 3rem;
   border-radius: 10px;
-  align-items: center;
+  max-width: 60%;
+  margin: 0 auto;
 }
 
 .chartsGrid p{
   color: black;
-  margin: 1rem 0;
+  font-size: 3rem;
+  direction: rtl;
+  text-align: right;
 }
 
 
