@@ -98,8 +98,8 @@ export default function UserPermissions() {
     setIsFormOpen(true);
   }
 
-  function handleSubmitUser() {
-    const { UserID, Name, Password } = formData;
+  function handleSubmitUser(values) {
+    const { UserID, Name, Password } = values;
 
     const idIsValid = /^\d{9}$/.test(UserID);
     const nameIsValid = /^[A-Za-z\u0590-\u05FF\s]{2,}$/.test(Name);
@@ -139,19 +139,19 @@ export default function UserPermissions() {
     }
 
     const endpoint = isEditMode
-      ? `/api/user/updateUser/${formData.UserID}`
+      ? `/api/user/updateUser/${values.UserID}`
       : "/api/user/addUser";
 
     const axiosMethod = isEditMode ? axios.put : axios.post;
 
-    axiosMethod(endpoint, formData)
+    axiosMethod(endpoint, values)
       .then((res) => {
         if (isEditMode) {
           setUsers((prev) =>
-            prev.map((u) => (u.UserID === formData.UserID ? formData : u))
+            prev.map((u) => (u.UserID === values.UserID ? values : u))
           );
         } else {
-          setUsers((prev) => [...prev, formData]);
+          setUsers((prev) => [...prev, values]);
         }
         setIsFormOpen(false);
       })
