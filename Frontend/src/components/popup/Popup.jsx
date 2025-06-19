@@ -22,7 +22,7 @@ const Popup = ({ header, text, isOpen, onClose, children }) => {
         {text && <p className={styles.popupText}>{text}</p>}
         {children}
         <button className={styles.closeButton} onClick={onClose}>
-          Close
+          ❌
         </button>
       </div>
     </div>

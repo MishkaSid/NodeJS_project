@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import styles from "../adminPages.module.css";
 import Upload from "../../../components/upload/UploadStudentTable";
@@ -19,6 +18,8 @@ export default function UserPermissions() {
     Role: "Examinee",
     CourseID: null,
   });
+  const [popupConfig, setPopupConfig] = useState(null);
+  const [selectedRole, setSelectedRole] = useState("");
 
   useEffect(() => {
     axios
@@ -34,20 +35,47 @@ export default function UserPermissions() {
     ? users.filter(
         (user) =>
           user &&
-          (
-            (user.Name || "").toLowerCase().includes((search || "").toLowerCase()) ||
-            (user.UserID?.toString() || "").includes((search || ""))
-          )
+          ((user.Name || "")
+            .toLowerCase()
+            .includes((search || "").toLowerCase()) ||
+            (user.UserID?.toString() || "").includes(search || ""))
       )
     : [];
 
+  const filteredByRole = filtered.filter((user) => {
+    if (selectedRole === "") return true;
+    if (selectedRole === "All") return true;
+    return user.Role === selectedRole;
+  });
+
+  const roles = ["All", "Admin", "Teacher", "Examinee"];
+  const roleOptions = roles.map((role) => (
+    <option key={role} value={role}>
+      {role}
+    </option>
+  ));
+
   function handleDeleteUser(id) {
-    axios
-      .delete(`/api/userController/deleteUser/${id}`)
-      .then(() => {
-        setUsers((prevUsers) => prevUsers.filter((user) => user.UserID !== id));
-      })
-      .catch((err) => console.error("Error deleting user:", err));
+    setPopupConfig({
+      title: "האם אתה בטוח?",
+      message: "מחיקת משתמש תמחק את כל הנתונים שלו",
+      confirmLabel: "כן, מחק",
+      cancelLabel: "ביטול",
+      onConfirm: () => {
+        axios
+          .delete(`/api/user/deleteUser/${id}`)
+          .then(() => {
+            setUsers((prevUsers) =>
+              prevUsers.filter((user) => user.UserID !== id)
+            );
+            setPopupConfig(null);
+          })
+          .catch((err) => {
+            console.error("Error deleting user:", err);
+            setPopupConfig(null);
+          });
+      },
+    });
   }
 
   function handleAddUser() {
@@ -64,12 +92,52 @@ export default function UserPermissions() {
   }
 
   function handleEditUser(user) {
-    setFormData({ ...user });
+    const { Password, ...rest } = user;
+    setFormData({ ...rest });
     setIsEditMode(true);
     setIsFormOpen(true);
   }
 
   function handleSubmitUser() {
+    const { UserID, Name, Password } = formData;
+
+    const idIsValid = /^\d{9}$/.test(UserID);
+    const nameIsValid = /^[A-Za-z\u0590-\u05FF\s]{2,}$/.test(Name);
+    const passwordIsValid = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{3,8}$/.test(
+      Password
+    );
+
+    if (!idIsValid) {
+      setPopupConfig({
+        title: "שגיאה",
+        message: "תעודת זהות חייבת להכיל בדיוק 9 ספרות.",
+        confirmLabel: "סגור",
+        onConfirm: () => setPopupConfig(null),
+      });
+      return;
+    }
+
+    if (!nameIsValid) {
+      setPopupConfig({
+        title: "שגיאה",
+        message: "השם חייב להכיל לפחות שני תווים, ורק אותיות ורווחים.",
+        confirmLabel: "סגור",
+        onConfirm: () => setPopupConfig(null),
+      });
+      return;
+    }
+
+    if (!isEditMode && !passwordIsValid) {
+      setPopupConfig({
+        title: "שגיאה",
+        message:
+          "הסיסמה חייבת להכיל לפחות אות אחת, מספר אחד, ואורכה בין 3 ל-8 תווים.",
+        confirmLabel: "סגור",
+        onConfirm: () => setPopupConfig(null),
+      });
+      return;
+    }
+
     const endpoint = isEditMode
       ? `/api/user/updateUser/${formData.UserID}`
       : "/api/user/addUser";
@@ -124,10 +192,11 @@ export default function UserPermissions() {
     },
     {
       label: "תפקיד",
-      type: "text",
+      type: "select",
       name: "Role",
       value: formData.Role,
       onChange: (e) => setFormData({ ...formData, Role: e.target.value }),
+      options: ["Admin", "Teacher", "Examinee"],
     },
   ];
 
@@ -138,13 +207,32 @@ export default function UserPermissions() {
         <input
           type="text"
           className={styles.searchInput}
-          placeholder="חפש משתמש לפי שם..."
+          placeholder="חפש משתמש לפי שם או ת.ז..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <div className={styles.addingLine}>
-          <button className={styles.addButton} onClick={handleAddUser}>הוסף משתמש</button>
+          <button className={styles.addButton} onClick={handleAddUser}>
+            הוסף משתמש
+          </button>
           <Upload />
+          <div className={styles.sort}>
+            <select
+              id="role-select"
+              className={styles.input}
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+            >
+              <option value="" disabled hidden>
+                בחר תפקיד
+              </option>
+              {roles.map((role) => (
+                <option key={role} value={role}>
+                  {role === "All" ? "הצג הכל" : role}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <table className={styles.table}>
           <thead>
@@ -157,7 +245,7 @@ export default function UserPermissions() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((user, index) => (
+            {filteredByRole.map((user, index) => (
               <tr key={index}>
                 <td>{user.UserID}</td>
                 <td>{user.Name}</td>
@@ -168,18 +256,18 @@ export default function UserPermissions() {
                     className={`${styles.actionButton} ${styles.editButton}`}
                     onClick={() => handleEditUser(user)}
                   >
-                    ✏️ ערוך
+                    ערוך ✏️
                   </button>
                   <button
                     className={`${styles.actionButton} ${styles.deleteButton}`}
                     onClick={() => handleDeleteUser(user.UserID)}
                   >
-                    🗑️ מחק
+                    מחק 🗑️
                   </button>
                 </td>
               </tr>
             ))}
-            {!filtered.length && (
+            {!filteredByRole.length && (
               <tr className="noResults">
                 <td colSpan="5">לא נמצאו משתמשים</td>
               </tr>
@@ -189,7 +277,31 @@ export default function UserPermissions() {
       </div>
       {isFormOpen && (
         <Popup isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
-          <Form inputs={formInputs} onSubmit={handleSubmitUser} />
+          <Form
+            inputs={
+              isEditMode
+                ? formInputs.filter((input) => input.name !== "Password")
+                : formInputs
+            }
+            onSubmit={handleSubmitUser}
+          />
+          {isEditMode && (
+            <div className={styles.note}>
+              <p>שינוי סיסמה יתבצע ממסך נפרד או בהרשמה מחדש בלבד.</p>
+            </div>
+          )}
+        </Popup>
+      )}
+      {popupConfig && (
+        <Popup
+          header={popupConfig.title}
+          text={popupConfig.message}
+          isOpen={true}
+          onClose={() => setPopupConfig(null)}
+        >
+          <button onClick={popupConfig.onConfirm}>
+            {popupConfig.confirmLabel}
+          </button>
         </Popup>
       )}
     </>
