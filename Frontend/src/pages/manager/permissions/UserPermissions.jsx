@@ -20,6 +20,7 @@ export default function UserPermissions() {
   });
   const [popupConfig, setPopupConfig] = useState(null);
   const [selectedRole, setSelectedRole] = useState("");
+  const [originalId, setOriginalId] = useState(null);
 
   useEffect(() => {
     axios
@@ -94,6 +95,7 @@ export default function UserPermissions() {
   function handleEditUser(user) {
     const { Password, ...rest } = user;
     setFormData({ ...rest });
+    setOriginalId(user.UserID);
     setIsEditMode(true);
     setIsFormOpen(true);
   }
@@ -139,7 +141,7 @@ export default function UserPermissions() {
     }
 
     const endpoint = isEditMode
-      ? `/api/user/updateUser/${values.UserID}`
+      ? `/api/user/updateUser/${originalId}`
       : "/api/user/addUser";
 
     const axiosMethod = isEditMode ? axios.put : axios.post;
@@ -148,7 +150,7 @@ export default function UserPermissions() {
       .then((res) => {
         if (isEditMode) {
           setUsers((prev) =>
-            prev.map((u) => (u.UserID === values.UserID ? values : u))
+            prev.map((u) => (u.UserID === originalId ? values : u))
           );
         } else {
           setUsers((prev) => [...prev, values]);
@@ -156,8 +158,21 @@ export default function UserPermissions() {
         setIsFormOpen(false);
       })
       .catch((err) => {
-        console.error("Error saving user:", err);
-        setIsFormOpen(false);
+        const backendMsg = err.response?.data?.error;
+        if (
+          err.response?.status === 400 &&
+          (backendMsg === "משתמש זה כבר קיים" || backendMsg === "אימייל זה כבר קיים" || backendMsg === "תעודת זהות זו כבר קיימת")
+        ) {
+          setPopupConfig({
+            title: "שגיאה",
+            message: backendMsg,
+            confirmLabel: "סגור",
+            onConfirm: () => setPopupConfig(null),
+          });
+        } else {
+          console.error("Error saving user:", err);
+          setIsFormOpen(false);
+        }
       });
   }
 

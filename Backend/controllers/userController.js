@@ -27,6 +27,22 @@ exports.createUser = async (req, res) => {
 
   try {
     const connection = await db.getConnection();
+    // Check for existing UserID
+    const [userIdRows] = await connection.query(
+      "SELECT * FROM users WHERE UserID = ?",
+      [UserID]
+    );
+    if (userIdRows.length > 0) {
+      return res.status(400).json({ error: "משתמש זה כבר קיים" });
+    }
+    // Check for existing Email
+    const [emailRows] = await connection.query(
+      "SELECT * FROM users WHERE Email = ?",
+      [Email]
+    );
+    if (emailRows.length > 0) {
+      return res.status(400).json({ error: "אימייל זה כבר קיים" });
+    }
     const [result] = await connection.query(
       "INSERT INTO users (UserID, Name, Email, Password, Role, CourseID) VALUES (?, ?, ?, ?, ?, ?)",
       [UserID, Name, Email, hashedPassword, Role, CourseID]
@@ -41,16 +57,50 @@ exports.createUser = async (req, res) => {
 
 // Update a user
 exports.updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { Name, Email, Role } = req.body;
+  const { id } = req.params; // old ID
+  const { UserID: newId, Name, Email, Role } = req.body;
 
   try {
     const connection = await db.getConnection();
-    await connection.query(
-      "UPDATE users SET Name = ?, Email = ?,  Role = ? WHERE UserID = ?",
-      [Name, Email, Role, id]
+
+    // First: get the current user by original ID
+    const [existingUserRows] = await connection.query(
+      "SELECT * FROM users WHERE UserID = ?",
+      [id]
     );
-    res.json({ Name, Email, Role });
+
+    if (existingUserRows.length === 0) {
+      return res.status(404).json({ error: "המשתמש לא נמצא" });
+    }
+
+    // 1. Check for duplicate ID (if changed)
+    if (String(newId) !== String(id)) {
+      const [idRows] = await connection.query(
+        "SELECT * FROM users WHERE UserID = ?",
+        [newId]
+      );
+      if (idRows.length > 0) {
+        return res.status(400).json({ error: "תעודת זהות זו כבר קיימת" });
+      }
+    }
+
+    // 2. Check for duplicate Email (if changed)
+    const [emailRows] = await connection.query(
+      "SELECT * FROM users WHERE Email = ? AND UserID != ?",
+      [Email, id]
+    );
+    if (emailRows.length > 0) {
+      return res.status(400).json({ error: "אימייל זה כבר קיים" });
+    }
+
+    // Update the user (including UserID if changed)
+    await connection.query(
+      "UPDATE users SET UserID = ?, Name = ?, Email = ?, Role = ? WHERE UserID = ?",
+      [newId, Name, Email, Role, id]
+    );
+
+    res.json({ UserID: newId, Name, Email, Role });
+
   } catch (err) {
     console.error("Error in updateUser:", err);
     res.status(500).json({ error: "Server error" });
