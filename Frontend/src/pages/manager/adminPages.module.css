@@ -354,3 +354,62 @@ noResults td {
   text-align: right;
 }
 
+.mainActions {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 2.2rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@media (max-width: 900px) {
+  .mainActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .addButton, .deleteButtonLarge, .editButtonLarge {
+    width: 100%;
+    min-width: 0;
+    font-size: 1.1rem;
+    padding: 1.1rem 0.5rem;
+  }
+  .topicsList {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .topicCardContainer {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    padding: 0.7rem 0.5rem;
+  }
+  .tableWrapper {
+    overflow-x: auto;
+  }
+  .tableFullWidth {
+    min-width: 600px;
+  }
+}
+
+@media (max-width: 600px) {
+  .mainActions {
+    gap: 0.7rem;
+    margin-bottom: 1.2rem;
+  }
+  .addButton, .deleteButtonLarge, .editButtonLarge {
+    font-size: 1rem;
+    padding: 0.8rem 0.3rem;
+  }
+  .topicsList {
+    gap: 0.7rem;
+  }
+  .topicCardContainer {
+    padding: 0.5rem 0.2rem;
+  }
+  .tableFullWidth {
+    min-width: 400px;
+  }
+}
+

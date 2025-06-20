@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from "react";
 import styles from "../adminPages.module.css";
-import Card from "../../../components/card/Card";
 import Popup from "../../../components/popup/Popup";
-import Form from "../../../components/form/Form";
 import axios from "axios";
 import PracticeContent from "../../../components/practiceContent/PracticeContent";
-
-/**
- * The ManageContent component renders the main page for managing content.
- * It contains a search bar and a table of content items. The table is
- * filtered based on the search input. The table has four columns: topic,
- * level, type and actions. The actions column contains two buttons: edit
- * and delete. The edit button navigates to the edit page, and the delete
- * button opens a confirmation dialog.
- *
- * @returns {JSX.Element} The rendered ManageContent component.
- */
+import CourseSelector from "./CourseSelector";
+import TopicList from "./TopicList";
+import TopicForm from "./TopicForm";
+import PracticeContentTable from "./PracticeContentTable";
 
 export default function ManageContent() {
   const [courses, setCourses] = useState([]);
@@ -25,11 +16,8 @@ export default function ManageContent() {
   const [isTopicPopupOpen, setIsTopicPopupOpen] = useState(false);
   const [isAddTopicOpen, setIsAddTopicOpen] = useState(false);
   const [isEditTopicOpen, setIsEditTopicOpen] = useState(false);
-  const [editTopicName, setEditTopicName] = useState("");
-  const [editTopicId, setEditTopicId] = useState(null);
-  const [newTopicName, setNewTopicName] = useState("");
-  const [newTopicId, setNewTopicId] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [editTopic, setEditTopic] = useState(null);
+  const [addTopicInitial, setAddTopicInitial] = useState({ TopicID: "", TopicName: "", CourseID: "" });
   const [practiceContent, setPracticeContent] = useState({}); // { [topicId]: [content, ...] }
   const [isAddContentPopupOpen, setIsAddContentPopupOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, topic: null });
@@ -47,12 +35,10 @@ export default function ManageContent() {
   // Fetch topics for selected course
   useEffect(() => {
     if (!selectedCourse) return;
-    setLoading(true);
     axios.get("/api/topics/getTopics").then(res => {
       const filtered = (res.data || []).filter(t => t.CourseID === selectedCourse);
       setTopics(filtered);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    });
   }, [selectedCourse]);
 
   // Fetch practice content for all topics in course
@@ -68,49 +54,81 @@ export default function ManageContent() {
     });
   }, [topics]);
 
-  // Add topic
+  // Course handlers
+  const handleSelectCourse = (courseId) => setSelectedCourse(courseId);
+  const handleAddCourse = () => setIsAddCourseOpen(true);
+  const handleDeleteCourse = (courseId) => {
+    const course = courses.find(c => c.CourseID === courseId);
+    setDeleteCourseConfirm({ open: true, course });
+  };
+
+  // Topic handlers
   const handleAddTopic = () => {
-    if (!newTopicName.trim() || !selectedCourse) return;
-    axios.post("/api/topics/addTopic", { TopicName: newTopicName, CourseID: selectedCourse })
+    setAddTopicInitial({ TopicID: "", TopicName: "", CourseID: selectedCourse });
+    setIsAddTopicOpen(true);
+  };
+  const handleEditTopic = (topic) => {
+    setEditTopic(topic);
+    setIsEditTopicOpen(true);
+  };
+  const handleDeleteTopic = (topic) => setDeleteConfirm({ open: true, topic });
+  const handleSelectTopic = (topic) => {
+    setSelectedTopic(topic);
+    setIsTopicPopupOpen(true);
+  };
+
+  // Add topic submit
+  const handleAddTopicSubmit = (values) => {
+    const payload = { TopicName: values.TopicName, CourseID: selectedCourse };
+    if (values.TopicID) payload.TopicID = Number(values.TopicID);
+    axios.post("/api/topics/addTopic", payload)
       .then(res => {
         setTopics(prev => [...prev, res.data]);
-        setNewTopicName("");
         setIsAddTopicOpen(false);
       });
   };
-
-  // Edit topic
-  const handleEditTopic = () => {
-    if (!editTopicName.trim() || !selectedCourse || !editTopicId) return;
-    axios.put(`/api/topics/updateTopic/${editTopicId}`, { TopicName: editTopicName, CourseID: selectedCourse })
-      .then(res => {
-        setTopics(prev => prev.map(t => t.TopicID === editTopicId ? { ...t, TopicName: editTopicName } : t));
-        setIsEditTopicOpen(false);
-        setEditTopicName("");
-        setEditTopicId(null);
-      });
+  // Edit topic submit
+  const handleEditTopicSubmit = (values) => {
+    axios.put(`/api/topics/updateTopic/${editTopic.TopicID}`, {
+      TopicName: values.TopicName,
+      CourseID: selectedCourse,
+      TopicID: values.TopicID
+    }).then(res => {
+      setTopics(prev => prev.map(t => t.TopicID === editTopic.TopicID ? { ...t, ...values } : t));
+      setIsEditTopicOpen(false);
+      setEditTopic(null);
+    });
   };
 
-  // Delete topic
-  const handleDeleteTopic = (topicId) => {
-    axios.delete(`/api/topics/deleteTopic/${topicId}`)
+  // Delete topic confirm
+  const handleDeleteTopicConfirm = () => {
+    axios.delete(`/api/topics/deleteTopic/${deleteConfirm.topic.TopicID}`)
       .then(() => {
-        setTopics(prev => prev.filter(t => t.TopicID !== topicId));
+        setTopics(prev => prev.filter(t => t.TopicID !== deleteConfirm.topic.TopicID));
+        setDeleteConfirm({ open: false, topic: null });
       });
   };
 
-  // Delete practice content
-  const handleDeleteContent = (exerciseId, topicId) => {
+  // Delete course confirm
+  const handleDeleteCourseConfirm = () => {
+    axios.delete(`/api/courses/deleteCourse/${deleteCourseConfirm.course.CourseID}`)
+      .then(() => {
+        setCourses(prev => prev.filter(c => c.CourseID !== deleteCourseConfirm.course.CourseID));
+        if (selectedCourse === deleteCourseConfirm.course.CourseID) setSelectedCourse(null);
+        setDeleteCourseConfirm({ open: false, course: null });
+      });
+  };
+
+  // Practice content handlers
+  const handleDeleteContent = (exerciseId) => {
     axios.delete(`/api/practice/practiceExercise/${exerciseId}`)
       .then(() => {
         setPracticeContent(prev => ({
           ...prev,
-          [topicId]: prev[topicId].filter(c => c.ExerciseID !== exerciseId)
+          [selectedTopic.TopicID]: prev[selectedTopic.TopicID].filter(c => c.ExerciseID !== exerciseId)
         }));
       });
   };
-
-  // Add practice content (handled by PracticeContent component)
   const handleContentAdded = (topicId, newContent) => {
     setPracticeContent(prev => ({
       ...prev,
@@ -121,179 +139,22 @@ export default function ManageContent() {
   return (
     <div className={styles.adminPage}>
       <h1 className={styles.pageTitle}>ניהול תכנים</h1>
-      {/* Course Dropdown */}
-      <div className={styles.addingLine}>
-        <label htmlFor="courseSelect" style={{ fontWeight: 600 }}>בחר קורס:</label>
-        <select
-          id="courseSelect"
-          className={styles.searchInput}
-          value={selectedCourse || ""}
-          onChange={e => setSelectedCourse(Number(e.target.value))}
-        >
-          <option value="" disabled>בחר קורס</option>
-          {courses.map(course => (
-            <option key={course.CourseID} value={course.CourseID}>{course.CourseName}</option>
-          ))}
-        </select>
-        {selectedCourse ? (
-          <button className={styles.deleteButtonLarge} style={{marginRight: 8}} onClick={() => {
-            const course = courses.find(c => c.CourseID === selectedCourse);
-            setDeleteCourseConfirm({ open: true, course });
-          }}>
-            מחק קורס
-          </button>
-        ) : (
-          <button className={styles.addButton} onClick={() => setIsAddCourseOpen(true)}>
-            הוסף קורס
-          </button>
-        )}
-        <button className={styles.addButton} onClick={() => setIsAddTopicOpen(true)} disabled={!selectedCourse}>
-          הוסף נושא
-        </button>
-      </div>
-      {/* Topics List */}
-      <div className={styles.topicsList}>
-        {topics.map((topic) => (
-          <div key={topic.TopicID} className={styles.topicCardContainer}>
-            <Card
-              title={topic.TopicName}
-              onClick={() => {
-                setSelectedTopic(topic);
-                setIsTopicPopupOpen(true);
-              }}
-              size="medium"
-            />
-            <div className={styles.topicActions}>
-              <button className={styles.editButtonLarge} onClick={() => { setEditTopicId(topic.TopicID); setEditTopicName(topic.TopicName); setIsEditTopicOpen(true); }}>ערוך</button>
-              <button className={styles.deleteButtonLarge} onClick={() => setDeleteConfirm({ open: true, topic })}>מחק</button>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Add Topic Popup */}
-      <Popup isOpen={isAddTopicOpen} onClose={() => setIsAddTopicOpen(false)} header="הוסף נושא חדש">
-        <Form
-          inputs={[{
-            label: "מזהה נושא (TopicID)",
-            type: "number",
-            name: "topicId",
-            value: newTopicId,
-            onChange: (e) => setNewTopicId(e.target.value),
-            placeholder: "אוטומטי אלא אם שונה"
-          }, {
-            label: "שם נושא",
-            type: "text",
-            name: "topic",
-            value: newTopicName,
-            onChange: (e) => setNewTopicName(e.target.value),
-          }, {
-            label: "מזהה קורס (CourseID)",
-            type: "number",
-            name: "courseId",
-            value: selectedCourse || "",
-            disabled: true
-          }]}
-          onSubmit={() => {
-            if (!newTopicName.trim() || !selectedCourse) return;
-            const payload = { TopicName: newTopicName, CourseID: selectedCourse };
-            if (newTopicId) payload.TopicID = Number(newTopicId);
-            axios.post("/api/topics/addTopic", payload)
-              .then(res => {
-                setTopics(prev => [...prev, res.data]);
-                setNewTopicName("");
-                setNewTopicId("");
-                setIsAddTopicOpen(false);
-              });
-          }}
-        />
-      </Popup>
-      {/* Edit Topic Popup */}
-      <Popup isOpen={isEditTopicOpen} onClose={() => setIsEditTopicOpen(false)} header="ערוך נושא">
-        <Form
-          inputs={[{
-            label: "שם נושא",
-            type: "text",
-            name: "topic",
-            value: editTopicName,
-            onChange: (e) => setEditTopicName(e.target.value),
-          }]}
-          onSubmit={handleEditTopic}
-        />
-      </Popup>
-      {/* Practice Content Popup (table and add content) */}
-      <Popup isOpen={isTopicPopupOpen} onClose={() => setIsTopicPopupOpen(false)} header={selectedTopic?.TopicName || "תוכן נושא"}>
-        <div className={`${styles.prominentPopup} ${styles.popupLarge}`}>
-          <div className={styles.tableWrapper}>
-            <table className={styles.tableFullWidth}>
-              <thead>
-                <tr>
-                  <th>תמונה</th>
-                  <th>אפשרויות תשובה</th>
-                  <th>תשובה נכונה</th>
-                  <th>מחיקה</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(practiceContent[selectedTopic?.TopicID] || []).map(content => (
-                  <tr key={content.ExerciseID}>
-                    <td>
-                      {content.ContentType === "image" && (
-                        <img src={content.ContentValue} alt="img" style={{ maxWidth: 80, maxHeight: 60, borderRadius: 8 }} />
-                      )}
-                    </td>
-                    <td>
-                      {(content.AnswerOptions || []).map((opt, i) => (
-                        <div key={i}>{String.fromCharCode(65 + i)}. {opt}</div>
-                      ))}
-                    </td>
-                    <td>{content.CorrectAnswer}</td>
-                    <td>
-                      <button className={styles.smallButton} onClick={() => handleDeleteContent(content.ExerciseID, selectedTopic.TopicID)}>מחק</button>
-                    </td>
-                  </tr>
-                ))}
-                {(practiceContent[selectedTopic?.TopicID] || []).length === 0 && (
-                  <tr><td colSpan="4">אין תוכן</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          <button className={styles.addButton} onClick={() => setIsAddContentPopupOpen(true)}>הוסף תוכן</button>
-          {/* Add Practice Content Popup (nested) */}
-          <PracticeContent
-            topic={selectedTopic}
-            isOpen={isAddContentPopupOpen}
-            onClose={() => setIsAddContentPopupOpen(false)}
-          />
-        </div>
-      </Popup>
-      {/* Delete Topic Confirmation Popup */}
-      <Popup isOpen={deleteConfirm.open} onClose={() => setDeleteConfirm({ open: false, topic: null })} header="אישור מחיקה">
-        <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-          <div style={{ fontSize: 18, marginBottom: 18 }}>
-            האם אתה בטוח שברצונך למחוק את הנושא "{deleteConfirm.topic?.TopicName}"?
-          </div>
-          <button
-            className={styles.deleteButtonLarge}
-            style={{ marginLeft: 8 }}
-            onClick={() => {
-              handleDeleteTopic(deleteConfirm.topic.TopicID);
-              setDeleteConfirm({ open: false, topic: null });
-            }}
-          >מחק</button>
-        </div>
-      </Popup>
+      {/* Course Selector */}
+      <CourseSelector
+        courses={courses}
+        selectedCourse={selectedCourse}
+        onSelect={handleSelectCourse}
+        onAdd={handleAddCourse}
+        onDelete={handleDeleteCourse}
+        onAddTopic={handleAddTopic}
+      />
+      
       {/* Add Course Popup */}
       <Popup isOpen={isAddCourseOpen} onClose={() => setIsAddCourseOpen(false)} header="הוסף קורס חדש">
-        <Form
-          inputs={[{
-            label: "שם קורס",
-            type: "text",
-            name: "course",
-            value: newCourseName,
-            onChange: (e) => setNewCourseName(e.target.value),
-          }]}
-          onSubmit={() => {
+        <form
+          className={styles.form}
+          onSubmit={e => {
+            e.preventDefault();
             if (!newCourseName.trim()) return;
             axios.post("/api/courses/addCourse", { CourseName: newCourseName })
               .then(res => {
@@ -302,7 +163,19 @@ export default function ManageContent() {
                 setIsAddCourseOpen(false);
               });
           }}
-        />
+        >
+          <div className={styles.inputContainer}>
+            <label className={styles.label}>שם קורס</label>
+            <input
+              className={styles.input}
+              type="text"
+              value={newCourseName}
+              onChange={e => setNewCourseName(e.target.value)}
+            />
+          </div>
+          <button className={styles.submitButton} type="submit">הוסף</button>
+          <button className={styles.smallButton} type="button" onClick={() => setIsAddCourseOpen(false)} style={{marginTop: 8}}>ביטול</button>
+        </form>
       </Popup>
       {/* Delete Course Confirmation Popup */}
       <Popup isOpen={deleteCourseConfirm.open} onClose={() => setDeleteCourseConfirm({ open: false, course: null })} header="אישור מחיקת קורס">
@@ -313,15 +186,65 @@ export default function ManageContent() {
           <button
             className={styles.deleteButtonLarge}
             style={{ marginLeft: 8 }}
-            onClick={() => {
-              axios.delete(`/api/courses/deleteCourse/${deleteCourseConfirm.course.CourseID}`)
-                .then(() => {
-                  setCourses(prev => prev.filter(c => c.CourseID !== deleteCourseConfirm.course.CourseID));
-                  if (selectedCourse === deleteCourseConfirm.course.CourseID) setSelectedCourse(null);
-                  setDeleteCourseConfirm({ open: false, course: null });
-                });
-            }}
+            onClick={handleDeleteCourseConfirm}
           >מחק</button>
+        </div>
+      </Popup>
+      {/* Topic List */}
+      {selectedCourse && (
+        <>
+          <TopicList
+            topics={topics}
+            onSelectTopic={handleSelectTopic}
+            onEditTopic={handleEditTopic}
+            onDeleteTopic={handleDeleteTopic}
+          />
+        </>
+      )}
+      {/* Add Topic Popup */}
+      <Popup isOpen={isAddTopicOpen} onClose={() => setIsAddTopicOpen(false)} header="הוסף נושא חדש">
+        <TopicForm
+          initialValues={addTopicInitial}
+          onSubmit={handleAddTopicSubmit}
+          onClose={() => setIsAddTopicOpen(false)}
+          mode="add"
+        />
+      </Popup>
+      {/* Edit Topic Popup */}
+      <Popup isOpen={isEditTopicOpen} onClose={() => setIsEditTopicOpen(false)} header="ערוך נושא">
+        <TopicForm
+          initialValues={editTopic || { TopicID: "", TopicName: "", CourseID: selectedCourse }}
+          onSubmit={handleEditTopicSubmit}
+          onClose={() => setIsEditTopicOpen(false)}
+          mode="edit"
+        />
+      </Popup>
+      {/* Delete Topic Confirmation Popup */}
+      <Popup isOpen={deleteConfirm.open} onClose={() => setDeleteConfirm({ open: false, topic: null })} header="אישור מחיקה">
+        <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+          <div style={{ fontSize: 18, marginBottom: 18 }}>
+            האם אתה בטוח שברצונך למחוק את הנושא "{deleteConfirm.topic?.TopicName}"?
+          </div>
+          <button
+            className={styles.deleteButtonLarge}
+            style={{ marginLeft: 8 }}
+            onClick={handleDeleteTopicConfirm}
+          >מחק</button>
+        </div>
+      </Popup>
+      {/* Practice Content Popup (table and add content) */}
+      <Popup isOpen={isTopicPopupOpen} onClose={() => setIsTopicPopupOpen(false)} header={selectedTopic?.TopicName || "תוכן נושא"}>
+        <div className={`${styles.prominentPopup} ${styles.popupLarge}`}>
+          <PracticeContentTable
+            contentList={practiceContent[selectedTopic?.TopicID] || []}
+            onDeleteContent={handleDeleteContent}
+          />
+          <button className={styles.addButton} onClick={() => setIsAddContentPopupOpen(true)}>הוסף תוכן</button>
+          <PracticeContent
+            topic={selectedTopic}
+            isOpen={isAddContentPopupOpen}
+            onClose={() => setIsAddContentPopupOpen(false)}
+          />
         </div>
       </Popup>
     </div>
