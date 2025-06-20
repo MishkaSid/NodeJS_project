@@ -1,6 +1,6 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import styles from "./card.module.css";
+import { navigate } from "../../app/navigate";
 
 /**
  * A clickable card component. Can be customized with a title, description, icon, size, and layout.
@@ -14,12 +14,12 @@ import styles from "./card.module.css";
  * @prop {String} [layout=vertical] The card layout. Can be "vertical" or "horizontal".
  */
 
-export default function Card({ title, description, icon, to, size = "medium", layout = "vertical" }) {
-  const navigate = useNavigate();
-
+export default function Card({ title, description, icon, to, size = "medium", layout = "vertical", onClick }) {
   const handleClick = () => {
     if (to) {
       navigate(to);
+    } else if (onClick) {
+      onClick();
     }
   };
 

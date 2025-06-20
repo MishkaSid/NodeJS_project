@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const generalDataController = require('../controllers/generalDataController');
-const specificDataController = require('../controllers/specificUserDataController');
 const userController = require('../controllers/userController');
 const coursesDataController = require('../controllers/coursesDataController');
 const topicDataController = require('../controllers/topicDataController');
+const practiceContentController = require('../controllers/practiceContentController');
 
 /*  general data routes  */
 
@@ -23,19 +23,6 @@ router.get('/practice', generalDataController.getPracticeData);
 router.get('/exams',generalDataController.getExamData);
 // Route for fetching all videos
 router.get('/videos',generalDataController.getVideos);
-
-
-/* specific data routes */
-
-// Route for fetching specific user data
-router.get('/user/:id', specificDataController.getSpecificUser);
-// Route for fetching specific examinee data
-router.get('/examinee/:id', specificDataController.getSpecificExaminee);
-// Route for fetching specific teacher data
-router.get('/teacher/:id', specificDataController.getSpecificTeacher);
-// Route for fetching specific admin data
-router.get('/admin/:id', specificDataController.getSpecificAdmin);
-
 
 //user routes
 // Route for adding a new user
@@ -72,5 +59,12 @@ router.put('/updateTopic/:id', topicDataController.updateTopic);
 // Route for deleting a topic
 router.delete('/deleteTopic/:id', topicDataController.deleteTopic);
 
+// Practice content (exercise) routes
+router.get('/practiceExercises', practiceContentController.getAllExercises);
+router.get('/practiceExercise/:id', practiceContentController.getExerciseById);
+router.post('/practiceExercise', practiceContentController.createExercise);
+router.put('/practiceExercise/:id', practiceContentController.updateExercise);
+router.delete('/practiceExercise/:id', practiceContentController.deleteExercise);
+router.post('/practiceExercise/upload', practiceContentController.uploadFile);
 
 module.exports = router;
