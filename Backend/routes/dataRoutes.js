@@ -8,7 +8,6 @@ const practiceContentController = require('../controllers/practiceContentControl
 
 /*  general data routes  */
 
-
 // Route for fetching all users
 router.get('/users',generalDataController.getUsers);
 // Route for fetching all admins

@@ -118,4 +118,47 @@
   margin-top: 0.5rem;
   font-size: 1rem;
   text-align: center;
+}
+.answerOptionRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.answerOptionInput {
+  flex: 1;
+}
+.answerOptionRadio {
+  margin-left: 4px;
+}
+.answerOptionLabel {
+  margin-left: 4px;
+  font-weight: 600;
+}
+.answerOptionRemove {
+  margin-right: 4px;
+  color: #e53935;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+}
+.addOptionButton {
+  margin-top: 4px;
+  background: #4f8cff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.addOptionButton:hover {
+  background: #3b82f6;
+}
+.optionHint {
+  font-size: 13px;
+  color: #888;
+  margin-top: 4px;
 } 

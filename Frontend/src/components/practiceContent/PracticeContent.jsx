@@ -3,10 +3,23 @@ import styles from "./practiceContent.module.css";
 import Popup from "../popup/Popup";
 import axios from "axios";
 
+const contentTypeOptions = [
+  { value: "image", label: "תמונה" },
+];
+
+function getDefaultContent() {
+  return {
+    contentType: "image",
+    contentValue: "",
+    AnswerOptions: ["", ""],
+    CorrectAnswer: "A",
+  };
+}
 
 export default function PracticeContent({ topic, isOpen, onClose }) {
   const [topicExercises, setTopicExercises] = useState([]);
   const [isAddContentOpen, setIsAddContentOpen] = useState(false);
+  const [newContent, setNewContent] = useState(getDefaultContent());
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,8 +38,9 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
 
   // Add content to selected topic
   const handleAddContent = async () => {
-    if (newContent.contentType === "text" && !newContent.contentValue.trim()) return;
-    if ((newContent.contentType === "image" || newContent.contentType === "file") && !newContent.contentValue) return;
+    if (!newContent.contentValue) return;
+    if (newContent.AnswerOptions.length < 2 || newContent.AnswerOptions.some(opt => !opt.trim())) return;
+    if (!newContent.CorrectAnswer) return;
     const payload = {
       TopicID: topic.TopicID,
       ContentType: newContent.contentType,
@@ -38,7 +52,7 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
       .then(res => {
         setTopicExercises(prev => [...prev, res.data]);
         setIsAddContentOpen(false);
-        setNewContent({ contentType: "text", contentValue: "", level: levelOptions[0], type: typeOptions[0], AnswerOptions: [], CorrectAnswer: "" });
+        setNewContent(getDefaultContent());
         setUploadError("");
       });
   };
@@ -109,24 +123,11 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
             <select
               className={styles.input}
               value={newContent.contentType}
-              onChange={e => setNewContent(c => ({ ...c, contentType: e.target.value, contentValue: "" }))}
+              disabled
             >
-              {contentTypeOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
+              <option value="image">תמונה</option>
             </select>
           </div>
-          {newContent.contentType === "text" && (
-            <div className={styles.inputContainer}>
-              <label className={styles.label}>טקסט</label>
-              <textarea
-                className={styles.input}
-                value={newContent.contentValue}
-                onChange={e => setNewContent(c => ({ ...c, contentValue: e.target.value }))}
-                rows={3}
-              />
-            </div>
-          )}
           {(newContent.contentType === "image") && (
             <div className={styles.inputContainer}>
               <label className={styles.label}>בחר תמונה</label>
@@ -144,28 +145,51 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
             </div>
           )}
           <div className={styles.inputContainer}>
-            <label className={styles.label}>רמת קושי</label>
-            <select
-              className={styles.input}
-              value={newContent.level}
-              onChange={e => setNewContent(c => ({ ...c, level: e.target.value }))}
-            >
-              {levelOptions.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
-          </div>
-          <div className={styles.inputContainer}>
-            <label className={styles.label}>סוג</label>
-            <select
-              className={styles.input}
-              value={newContent.type}
-              onChange={e => setNewContent(c => ({ ...c, type: e.target.value }))}
-            >
-              {typeOptions.map(opt => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
+            <label className={styles.label}>אפשרויות תשובה</label>
+            {newContent.AnswerOptions.map((option, idx) => (
+              <div key={idx} className={styles.answerOptionRow}>
+                <input
+                  className={`${styles.input} ${styles.answerOptionInput}`}
+                  type="text"
+                  placeholder={`תשובה ${String.fromCharCode(65 + idx)}`}
+                  value={option}
+                  onChange={e => {
+                    const updated = [...newContent.AnswerOptions];
+                    updated[idx] = e.target.value;
+                    setNewContent(c => ({ ...c, AnswerOptions: updated }));
+                  }}
+                  required
+                />
+                <input
+                  type="radio"
+                  name="correctAnswer"
+                  className={styles.answerOptionRadio}
+                  checked={newContent.CorrectAnswer === String.fromCharCode(65 + idx)}
+                  onChange={() => setNewContent(c => ({ ...c, CorrectAnswer: String.fromCharCode(65 + idx) }))}
+                />
+                <span className={styles.answerOptionLabel}>{String.fromCharCode(65 + idx)}</span>
+                {newContent.AnswerOptions.length > 2 && (
+                  <button
+                    type="button"
+                    className={styles.answerOptionRemove}
+                    onClick={() => {
+                      const updated = newContent.AnswerOptions.filter((_, i) => i !== idx);
+                      let correct = newContent.CorrectAnswer;
+                      if (correct === String.fromCharCode(65 + idx)) correct = "A";
+                      setNewContent(c => ({ ...c, AnswerOptions: updated, CorrectAnswer: correct }));
+                    }}
+                  >✕</button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              className={styles.addOptionButton}
+              onClick={() => {
+                setNewContent(c => ({ ...c, AnswerOptions: [...c.AnswerOptions, ""] }));
+              }}
+            >הוסף אפשרות</button>
+            <div className={styles.optionHint}>בחר את התשובה הנכונה (עיגול ימני)</div>
           </div>
           <button className={styles.submitButton} type="submit" disabled={uploading}>
             הוסף
