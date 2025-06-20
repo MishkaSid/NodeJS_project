@@ -1,6 +1,20 @@
 import styles from "./form.module.css";
 
+/**
+ * @component Form
+ * @description A reusable form component that dynamically generates input fields based on a provided array.
+ * It handles form submission and supports different input types, including a special case for a 'Role' dropdown.
+ * @param {object} props - The component props.
+ * @param {Array<object>} props.inputs - An array of input objects to be rendered in the form. Each object should have properties like `label`, `name`, `value`, `onChange`, and `type`.
+ * @param {Function} props.onSubmit - The function to be called when the form is submitted.
+ * @returns {JSX.Element} The rendered form component.
+ */
 const Form = ({ inputs, onSubmit }) => {
+  /**
+   * @function handleSubmit
+   * @description Prevents the default form submission behavior and calls the `onSubmit` prop function.
+   * @param {React.SyntheticEvent} e - The form submission event.
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit();

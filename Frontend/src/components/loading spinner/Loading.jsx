@@ -1,5 +1,13 @@
 import "./loading.css";
 
+/**
+ * @component Loading
+ * @description A component that displays a full-screen loading animation.
+ * It consists of a semi-transparent background and a central animated loader
+ * with a "Loading" text message. This is used to indicate that a process
+ * is running in the background, such as a network request.
+ * @returns {JSX.Element} The rendered loading spinner component.
+ */
 export default function Loading() {
   return (
     <>

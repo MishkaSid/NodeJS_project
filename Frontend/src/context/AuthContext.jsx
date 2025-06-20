@@ -13,23 +13,23 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // user = { name, role }
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    try {
-      const decoded = jwtDecode(token);
-      if (decoded.exp * 1000 > Date.now()) {
-        setUser(decoded);
-      } else {
+  // On mount, check for a token in local storage to initialize user state.
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.exp * 1000 > Date.now()) {
+          setUser(decoded);
+        } else {
+          localStorage.removeItem("token");
+        }
+      } catch {
         localStorage.removeItem("token");
       }
-    } catch {
-      localStorage.removeItem("token");
     }
-  }
-  setLoading(false); // ✅ done loading
-}, []);
-
+    setLoading(false); // ✅ done loading
+  }, []);
 
   /**
    * Logs in the user by setting the user in state and local storage.
@@ -56,4 +56,5 @@ useEffect(() => {
   );
 };
 
+// Custom hook to easily access auth context.
 export const useAuth = () => useContext(AuthContext);

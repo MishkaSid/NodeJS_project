@@ -17,12 +17,14 @@ const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [path, setPath] = useState(window.location.pathname);
 
+  // This effect listens for browser navigation events and updates the path state.
   useEffect(() => {
     const onPop = () => setPath(window.location.pathname);
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  // This memoized value determines the user type based on the user's role or the current path.
   const userType = useMemo(() => {
     if (loggedInUser?.role) return loggedInUser.role;
     if (path.includes("manager")) return "Admin";
@@ -30,6 +32,7 @@ const Layout = ({ children }) => {
     return "Examinee";
   }, [loggedInUser, path]);
 
+  // Toggles the sidebar's open/closed state.
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };

@@ -37,6 +37,11 @@ function Sidebar({ isOpen, setIsOpen, userType = "guest" }) {
     guest: []
   };
 
+  /**
+   * @function handleLogout
+   * @description Logs the user out by calling the logout function from the authentication context,
+   * and then navigates the user back to the home page ('/').
+   */
   function handleLogout() {
     logout();
     navigate("/");

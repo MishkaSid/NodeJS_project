@@ -15,6 +15,11 @@ import { navigate } from "../../app/navigate";
  */
 
 export default function Card({ title, description, icon, to, size = "medium", layout = "vertical", onClick }) {
+  /**
+   * @function handleClick
+   * @description Handles the click event on the card. If a 'to' prop is provided, it navigates
+   * to the specified path. Otherwise, if an 'onClick' prop is provided, it calls that function.
+   */
   const handleClick = () => {
     if (to) {
       navigate(to);

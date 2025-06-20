@@ -16,6 +16,15 @@ const MODE_FIELDS = {
   edit: ["UserID", "Name", "Email", "Role"], // Password not shown in edit
 };
 
+/**
+ * @function validate
+ * @description Validates the form values based on the fields required for the current mode.
+ * It checks for specific formats (UserID, Name, Email, Password) and ensures that all required fields are filled.
+ * @param {Array<string>} fields - An array of field names to validate.
+ * @param {object} values - An object containing the current form values.
+ * @param {string} mode - The current form mode ('login', 'add', or 'edit').
+ * @returns {string|null} An error message string if validation fails, or null if it succeeds.
+ */
 function validate(fields, values, mode) {
   // Returns error message string or null
   if (fields.includes("UserID")) {
@@ -47,6 +56,20 @@ function validate(fields, values, mode) {
   return null;
 }
 
+/**
+ * @component UserForm
+ * @description A reusable form for user-related actions like login, adding a new user, or editing an existing one.
+ * The form's fields, validation logic, and submit button text change based on the 'mode' prop.
+ * It uses a shared `FIELD_CONFIG` for field properties and `MODE_FIELDS` to determine which fields are visible.
+ * It has its own validation and can display error messages in a popup.
+ * @param {object} props - The component props.
+ * @param {string} [props.mode='login'] - The mode of the form, can be 'login', 'add', or 'edit'.
+ * @param {object} [props.initialValues={}] - The initial values for the form fields.
+ * @param {Function} props.onSubmit - The function to call when the form is submitted successfully.
+ * @param {Function} [props.onValidationError] - An optional callback to handle validation errors. If not provided, a default popup is used.
+ * @param {string} [props.className=''] - Additional CSS classes to apply to the form element.
+ * @returns {JSX.Element} The rendered user form component.
+ */
 export default function UserForm({
   mode = "login",
   initialValues = {},
@@ -66,11 +89,24 @@ export default function UserForm({
 
   const fields = MODE_FIELDS[mode];
 
+  /**
+   * @function handleChange
+   * @description A generic change handler for all form inputs. It updates the component's 'values' state
+   * with the new value of the input that triggered the event.
+   * @param {React.ChangeEvent<HTMLInputElement|HTMLSelectElement>} e - The change event.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setValues((prev) => ({ ...prev, [name]: value }));
   };
 
+  /**
+   * @function handleSubmit
+   * @description Handles the form submission. It first validates the form values based on the current mode.
+   * If validation fails, it either calls the `onValidationError` prop or shows a popup with the error.
+   * If validation succeeds, it calls the `onSubmit` prop with the form values.
+   * @param {React.FormEvent<HTMLFormElement>} e - The form submission event.
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     const error = validate(fields, values, mode);

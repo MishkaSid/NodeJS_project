@@ -1,5 +1,11 @@
 import styles from "./unauthorize.module.css";
 
+/**
+ * @component Unauthorize
+ * @description A page displayed to users who try to access a route they are not authorized to view.
+ * It shows a message indicating lack of permission and provides a contact email for assistance.
+ * @returns {JSX.Element} The rendered unauthorized access page.
+ */
 const Unauthorize = () => {
   return (
     <div className={styles.container}>

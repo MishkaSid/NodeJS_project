@@ -6,11 +6,27 @@ import { useAuth } from "../../context/AuthContext";
 import { navigate } from "../../app/navigate";
 import UserForm from "../../components/form/UserForm";
 
+/**
+ * @component LoginPage
+ * @description The main login page for the application. It displays a welcome message, logos, and a login form.
+ * It uses the `UserForm` component in 'login' mode to handle user input. It also manages a popup for displaying login errors.
+ * @returns {JSX.Element} The rendered login page.
+ */
 function LoginPage() {
   const [showPopup, setShowPopup] = useState(false);
   const [loginErrorMessage, setLoginErrorMessage] = useState("");
   const { login } = useAuth();
 
+  /**
+   * @function handleLogin
+   * @description Handles the login process. It sends the user's credentials to the backend API.
+   * On a successful login, it saves the authentication token, decodes the user's role, and navigates
+   * to the appropriate dashboard. On failure, it displays an error message in a popup.
+   * @param {object} credentials - The user's login credentials.
+   * @param {string} credentials.email - The user's email.
+   * @param {string} credentials.password - The user's password.
+   * @returns {Promise<void>}
+   */
   const handleLogin = async ({ email, password }) => {
     try {
       const response = await axios.post(

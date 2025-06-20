@@ -4,22 +4,20 @@ import styles from "./welcome.module.css";
 
 
 /**
- * Scroll down to the next section of the page.
- * @function
- * @return {JSX.Element} No return value.
+ * @component Welcome
+ * @description A welcome section component that displays a greeting to the user and a scroll-down indicator.
+ * Clicking the indicator smoothly scrolls the page to the next section.
+ * @param {object} props - The component props.
+ * @param {object} [props.user={ username: "User" }] - The user object, containing the username to display.
+ * @param {React.ReactNode} props.children - The content to be rendered in the section below the welcome screen.
+ * @returns {JSX.Element} The rendered welcome component.
  */
 function Welcome({ user = { username: "User" }, children }){
 
 /**
- * Scroll down to the next section of the page.
- * @function
- * @return {none} No return value.
- * @description
- *   This function uses the `react-scroll` module to scroll down to the
- *   element with the `nextSection` name. The animation is set to last 800ms
- *   and to use the `easeInOutQuart` timing function.
+ * @function scrollDown
+ * @description Smoothly scrolls the page down to the 'nextSection' element using the `react-scroll` library.
  */
-
   const scrollDown = () => {
     scroller.scrollTo("nextSection", {
       duration: 800,

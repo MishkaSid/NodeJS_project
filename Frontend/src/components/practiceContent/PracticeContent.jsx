@@ -7,6 +7,12 @@ const contentTypeOptions = [
   { value: "image", label: "תמונה" },
 ];
 
+/**
+ * @function getDefaultContent
+ * @description Returns a default content object for a new practice exercise.
+ * This is used to initialize the state for the "add content" form.
+ * @returns {object} A default content object with properties for contentType, contentValue, AnswerOptions, and CorrectAnswer.
+ */
 function getDefaultContent() {
   return {
     contentType: "image",
@@ -16,6 +22,17 @@ function getDefaultContent() {
   };
 }
 
+/**
+ * @component PracticeContent
+ * @description A component that displays and manages the practice content for a given topic.
+ * It fetches the exercises for the topic and displays them. It also includes a form within a popup
+ * to add new practice exercises, including support for image uploads and multiple-choice answers.
+ * @param {object} props - The component props.
+ * @param {object} props.topic - The topic object for which to display and manage content.
+ * @param {boolean} props.isOpen - Whether the main popup for this component is open.
+ * @param {Function} props.onClose - The function to call to close the main popup.
+ * @returns {JSX.Element} The rendered practice content component.
+ */
 export default function PracticeContent({ topic, isOpen, onClose }) {
   const [topicExercises, setTopicExercises] = useState([]);
   const [isAddContentOpen, setIsAddContentOpen] = useState(false);
@@ -24,7 +41,11 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
   const [uploadError, setUploadError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Fetch exercises for selected topic
+  /**
+   * @effect
+   * @description Fetches the practice exercises for the selected topic from the server
+   * whenever the 'topic' prop changes. It filters the exercises by the topic's ID.
+   */
   useEffect(() => {
     if (!topic) return;
     setLoading(true);
@@ -36,7 +57,13 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
       .catch(() => setLoading(false));
   }, [topic]);
 
-  // Add content to selected topic
+  /**
+   * @function handleAddContent
+   * @description Handles the submission of the "add content" form. It performs validation to ensure
+   * that all required fields are filled, then sends a POST request to the server to create
+   * the new practice exercise. On success, it updates the local state to display the new exercise.
+   * @returns {Promise<void>}
+   */
   const handleAddContent = async () => {
     if (!newContent.contentValue) return;
     if (newContent.AnswerOptions.length < 2 || newContent.AnswerOptions.some(opt => !opt.trim())) return;
@@ -57,7 +84,14 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
       });
   };
 
-  // Handle file/image upload
+  /**
+   * @function handleFileUpload
+   * @description Handles the file upload process for the practice content. It takes the selected file,
+   * sends it to the server's upload endpoint, and on success, updates the 'newContent' state
+   * with the URL of the uploaded file.
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The file input change event.
+   * @returns {Promise<void>}
+   */
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;

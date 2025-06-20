@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "../adminPages.module.css";
 
+// Renders a table of practice content exercises.
 export default function PracticeContentTable({ contentList, onDeleteContent }) {
   return (
     <div className={styles.tableWrapper}>

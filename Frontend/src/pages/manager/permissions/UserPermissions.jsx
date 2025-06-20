@@ -5,6 +5,13 @@ import axios from "axios";
 import Popup from "../../../components/popup/Popup";
 import UserForm from "../../../components/form/UserForm";
 
+/**
+ * @component UserPermissions
+ * @description A page for managing user permissions. It displays a list of users that can be
+ * searched and filtered by role. It provides functionality to add, edit, and delete users
+ * through popups and forms. It also handles user confirmation for destructive actions like deletion.
+ * @returns {JSX.Element} The rendered user permissions page.
+ */
 export default function UserPermissions() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
@@ -22,6 +29,10 @@ export default function UserPermissions() {
   const [selectedRole, setSelectedRole] = useState("");
   const [originalId, setOriginalId] = useState(null);
 
+  /**
+   * @effect
+   * @description Fetches all users from the server when the component mounts.
+   */
   useEffect(() => {
     axios
       .get("/api/general/users")
@@ -32,6 +43,7 @@ export default function UserPermissions() {
       .catch((err) => console.error("Error fetching users:", err));
   }, []);
 
+  // Filter users based on the search input (name or ID).
   const filtered = Array.isArray(users)
     ? users.filter(
         (user) =>
@@ -43,6 +55,7 @@ export default function UserPermissions() {
       )
     : [];
 
+  // Further filter users based on the selected role.
   const filteredByRole = filtered.filter((user) => {
     if (selectedRole === "") return true;
     if (selectedRole === "All") return true;
@@ -56,6 +69,12 @@ export default function UserPermissions() {
     </option>
   ));
 
+  /**
+   * @function handleDeleteUser
+   * @description Opens a confirmation popup before deleting a user. If the user confirms,
+   * it sends a delete request to the server and removes the user from the local state.
+   * @param {number} id - The ID of the user to delete.
+   */
   function handleDeleteUser(id) {
     setPopupConfig({
       title: "האם אתה בטוח?",
@@ -79,6 +98,10 @@ export default function UserPermissions() {
     });
   }
 
+  /**
+   * @function handleAddUser
+   * @description Opens the user form in 'add' mode, clearing any previous form data.
+   */
   function handleAddUser() {
     setFormData({
       UserID: "",
@@ -92,6 +115,11 @@ export default function UserPermissions() {
     setIsFormOpen(true);
   }
 
+  /**
+   * @function handleEditUser
+   * @description Opens the user form in 'edit' mode, populating it with the data of the selected user.
+   * @param {object} user - The user object to be edited.
+   */
   function handleEditUser(user) {
     const { Password, ...rest } = user;
     setFormData({ ...rest });
@@ -100,6 +128,14 @@ export default function UserPermissions() {
     setIsFormOpen(true);
   }
 
+  /**
+   * @function handleSubmitUser
+   * @description Handles the submission of the user form (for both adding and editing).
+   * It performs client-side validation before sending the data to the server.
+   * On success, it updates the local user state. It also handles specific backend
+   * error messages by displaying them in a popup.
+   * @param {object} values - The form values.
+   */
   function handleSubmitUser(values) {
     const { UserID, Name, Password } = values;
 
