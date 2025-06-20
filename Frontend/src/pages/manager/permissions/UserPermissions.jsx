@@ -24,7 +24,7 @@ export default function UserPermissions() {
 
   useEffect(() => {
     axios
-      .get("/api/generalData/users")
+      .get("/api/general/users")
       .then((res) => {
         const fetchedUsers = res.data[0] || [];
         setUsers(fetchedUsers);

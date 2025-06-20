@@ -28,7 +28,7 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
   useEffect(() => {
     if (!topic) return;
     setLoading(true);
-    axios.get("/api/practiceExercises")
+    axios.get("/api/practice/practiceExercises")
       .then(res => {
         setTopicExercises((res.data || []).filter(e => e.TopicID === topic.TopicID));
         setLoading(false);
@@ -48,7 +48,7 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
       AnswerOptions: newContent.AnswerOptions,
       CorrectAnswer: newContent.CorrectAnswer,
     };
-    axios.post("/api/practiceExercise", payload)
+    axios.post("/api/practice/practiceExercise", payload)
       .then(res => {
         setTopicExercises(prev => [...prev, res.data]);
         setIsAddContentOpen(false);
@@ -66,7 +66,7 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await axios.post("/api/practiceExercise/upload", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      const res = await axios.post("/api/practice/practiceExercise/upload", formData, { headers: { "Content-Type": "multipart/form-data" } });
       setNewContent((c) => ({ ...c, contentValue: res.data.url }));
       setUploading(false);
     } catch (err) {

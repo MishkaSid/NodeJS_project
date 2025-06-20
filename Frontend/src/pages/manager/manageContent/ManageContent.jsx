@@ -146,46 +146,9 @@ export default function ManageContent() {
               size="medium"
             />
             <div style={{ marginTop: 8, marginBottom: 8 }}>
-              <button className={styles.editButton} onClick={() => { setEditTopicId(topic.TopicID); setEditTopicName(topic.TopicName); setIsEditTopicOpen(true); }}>ערוך</button>
-              <button className={styles.deleteButton} onClick={() => handleDeleteTopic(topic.TopicID)}>מחק</button>
+              <button className={styles.smallButton} onClick={() => { setEditTopicId(topic.TopicID); setEditTopicName(topic.TopicName); setIsEditTopicOpen(true); }}>ערוך</button>
+              <button className={styles.smallButton} onClick={() => handleDeleteTopic(topic.TopicID)}>מחק</button>
             </div>
-            {/* Practice Content List */}
-            <div className={styles.table} style={{ marginBottom: 8 }}>
-              <table style={{ width: "100%" }}>
-                <thead>
-                  <tr>
-                    <th>תמונה</th>
-                    <th>אפשרויות תשובה</th>
-                    <th>תשובה נכונה</th>
-                    <th>מחיקה</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(practiceContent[topic.TopicID] || []).map(content => (
-                    <tr key={content.ExerciseID}>
-                      <td>
-                        {content.ContentType === "image" && (
-                          <img src={content.ContentValue} alt="img" style={{ maxWidth: 80, maxHeight: 60, borderRadius: 8 }} />
-                        )}
-                      </td>
-                      <td>
-                        {(content.AnswerOptions || []).map((opt, i) => (
-                          <div key={i}>{String.fromCharCode(65 + i)}. {opt}</div>
-                        ))}
-                      </td>
-                      <td>{content.CorrectAnswer}</td>
-                      <td>
-                        <button className={styles.deleteButton} onClick={() => handleDeleteContent(content.ExerciseID, topic.TopicID)}>מחק</button>
-                      </td>
-                    </tr>
-                  ))}
-                  {(practiceContent[topic.TopicID] || []).length === 0 && (
-                    <tr><td colSpan="4">אין תוכן</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <button className={styles.addButton} onClick={() => { setSelectedTopic(topic); setIsTopicPopupOpen(true); }}>הוסף תוכן</button>
           </div>
         ))}
       </div>
@@ -215,12 +178,51 @@ export default function ManageContent() {
           onSubmit={handleEditTopic}
         />
       </Popup>
-      {/* Practice Content Popup */}
-      <PracticeContent
-        topic={selectedTopic}
-        isOpen={isTopicPopupOpen}
-        onClose={() => setIsTopicPopupOpen(false)}
-      />
+      {/* Practice Content Popup (table and add content) */}
+      <Popup isOpen={isTopicPopupOpen} onClose={() => setIsTopicPopupOpen(false)} header={selectedTopic?.TopicName || "תוכן נושא"}>
+        <div className={styles.table} style={{ marginBottom: 8 }}>
+          <table style={{ width: "100%" }}>
+            <thead>
+              <tr>
+                <th>תמונה</th>
+                <th>אפשרויות תשובה</th>
+                <th>תשובה נכונה</th>
+                <th>מחיקה</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(practiceContent[selectedTopic?.TopicID] || []).map(content => (
+                <tr key={content.ExerciseID}>
+                  <td>
+                    {content.ContentType === "image" && (
+                      <img src={content.ContentValue} alt="img" style={{ maxWidth: 80, maxHeight: 60, borderRadius: 8 }} />
+                    )}
+                  </td>
+                  <td>
+                    {(content.AnswerOptions || []).map((opt, i) => (
+                      <div key={i}>{String.fromCharCode(65 + i)}. {opt}</div>
+                    ))}
+                  </td>
+                  <td>{content.CorrectAnswer}</td>
+                  <td>
+                    <button className={styles.smallButton} onClick={() => handleDeleteContent(content.ExerciseID, selectedTopic.TopicID)}>מחק</button>
+                  </td>
+                </tr>
+              ))}
+              {(practiceContent[selectedTopic?.TopicID] || []).length === 0 && (
+                <tr><td colSpan="4">אין תוכן</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <button className={styles.addButton} onClick={() => {}} disabled>הוסף תוכן (דרך חלון אחר)</button>
+        {/* The add content button is disabled here, as PracticeContent popup is used for adding */}
+        <PracticeContent
+          topic={selectedTopic}
+          isOpen={isTopicPopupOpen}
+          onClose={() => setIsTopicPopupOpen(false)}
+        />
+      </Popup>
     </div>
   );
 }
