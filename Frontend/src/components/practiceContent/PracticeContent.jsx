@@ -163,7 +163,7 @@ export default function PracticeContent({ topic, isOpen, onClose }) {
                 <input
                   type="radio"
                   name="correctAnswer"
-                  className={styles.answerOptionRadio}
+                  className={styles.answerOptionRadioSmall}
                   checked={newContent.CorrectAnswer === String.fromCharCode(65 + idx)}
                   onChange={() => setNewContent(c => ({ ...c, CorrectAnswer: String.fromCharCode(65 + idx) }))}
                 />

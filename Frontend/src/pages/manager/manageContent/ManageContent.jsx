@@ -30,6 +30,7 @@ export default function ManageContent() {
   const [newTopicName, setNewTopicName] = useState("");
   const [loading, setLoading] = useState(false);
   const [practiceContent, setPracticeContent] = useState({}); // { [topicId]: [content, ...] }
+  const [isAddContentPopupOpen, setIsAddContentPopupOpen] = useState(false);
 
   // Fetch all courses on mount
   useEffect(() => {
@@ -205,7 +206,7 @@ export default function ManageContent() {
                   </td>
                   <td>{content.CorrectAnswer}</td>
                   <td>
-                    <button className={styles.smallButton} onClick={() => handleDeleteContent(content.ExerciseID, selectedTopic.TopicID)}>מחק</button>
+                    <button className={styles.smallButton} onClick={() => handleDeleteContent(content.ExerciseID, selectedTopic.TopicID)}>מח</button>
                   </td>
                 </tr>
               ))}
@@ -215,12 +216,12 @@ export default function ManageContent() {
             </tbody>
           </table>
         </div>
-        <button className={styles.addButton} onClick={() => {}} disabled>הוסף תוכן (דרך חלון אחר)</button>
-        {/* The add content button is disabled here, as PracticeContent popup is used for adding */}
+        <button className={styles.addButton} onClick={() => setIsAddContentPopupOpen(true)}>הוסף תוכן</button>
+        {/* Add Practice Content Popup (nested) */}
         <PracticeContent
           topic={selectedTopic}
-          isOpen={isTopicPopupOpen}
-          onClose={() => setIsTopicPopupOpen(false)}
+          isOpen={isAddContentPopupOpen}
+          onClose={() => setIsAddContentPopupOpen(false)}
         />
       </Popup>
     </div>
