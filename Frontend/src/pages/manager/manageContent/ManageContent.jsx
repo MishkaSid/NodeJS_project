@@ -28,9 +28,14 @@ export default function ManageContent() {
   const [editTopicName, setEditTopicName] = useState("");
   const [editTopicId, setEditTopicId] = useState(null);
   const [newTopicName, setNewTopicName] = useState("");
+  const [newTopicId, setNewTopicId] = useState("");
   const [loading, setLoading] = useState(false);
   const [practiceContent, setPracticeContent] = useState({}); // { [topicId]: [content, ...] }
   const [isAddContentPopupOpen, setIsAddContentPopupOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, topic: null });
+  const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
+  const [newCourseName, setNewCourseName] = useState("");
+  const [deleteCourseConfirm, setDeleteCourseConfirm] = useState({ open: false, course: null });
 
   // Fetch all courses on mount
   useEffect(() => {
@@ -130,14 +135,26 @@ export default function ManageContent() {
             <option key={course.CourseID} value={course.CourseID}>{course.CourseName}</option>
           ))}
         </select>
+        {selectedCourse ? (
+          <button className={styles.deleteButtonLarge} style={{marginRight: 8}} onClick={() => {
+            const course = courses.find(c => c.CourseID === selectedCourse);
+            setDeleteCourseConfirm({ open: true, course });
+          }}>
+            מחק קורס
+          </button>
+        ) : (
+          <button className={styles.addButton} onClick={() => setIsAddCourseOpen(true)}>
+            הוסף קורס
+          </button>
+        )}
         <button className={styles.addButton} onClick={() => setIsAddTopicOpen(true)} disabled={!selectedCourse}>
           הוסף נושא
         </button>
       </div>
       {/* Topics List */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem" }}>
+      <div className={styles.topicsList}>
         {topics.map((topic) => (
-          <div key={topic.TopicID} style={{ minWidth: 300, maxWidth: 350 }}>
+          <div key={topic.TopicID} className={styles.topicCardContainer}>
             <Card
               title={topic.TopicName}
               onClick={() => {
@@ -146,9 +163,9 @@ export default function ManageContent() {
               }}
               size="medium"
             />
-            <div style={{ marginTop: 8, marginBottom: 8 }}>
-              <button className={styles.smallButton} onClick={() => { setEditTopicId(topic.TopicID); setEditTopicName(topic.TopicName); setIsEditTopicOpen(true); }}>ערוך</button>
-              <button className={styles.smallButton} onClick={() => handleDeleteTopic(topic.TopicID)}>מחק</button>
+            <div className={styles.topicActions}>
+              <button className={styles.editButtonLarge} onClick={() => { setEditTopicId(topic.TopicID); setEditTopicName(topic.TopicName); setIsEditTopicOpen(true); }}>ערוך</button>
+              <button className={styles.deleteButtonLarge} onClick={() => setDeleteConfirm({ open: true, topic })}>מחק</button>
             </div>
           </div>
         ))}
@@ -157,13 +174,37 @@ export default function ManageContent() {
       <Popup isOpen={isAddTopicOpen} onClose={() => setIsAddTopicOpen(false)} header="הוסף נושא חדש">
         <Form
           inputs={[{
+            label: "מזהה נושא (TopicID)",
+            type: "number",
+            name: "topicId",
+            value: newTopicId,
+            onChange: (e) => setNewTopicId(e.target.value),
+            placeholder: "אוטומטי אלא אם שונה"
+          }, {
             label: "שם נושא",
             type: "text",
             name: "topic",
             value: newTopicName,
             onChange: (e) => setNewTopicName(e.target.value),
+          }, {
+            label: "מזהה קורס (CourseID)",
+            type: "number",
+            name: "courseId",
+            value: selectedCourse || "",
+            disabled: true
           }]}
-          onSubmit={handleAddTopic}
+          onSubmit={() => {
+            if (!newTopicName.trim() || !selectedCourse) return;
+            const payload = { TopicName: newTopicName, CourseID: selectedCourse };
+            if (newTopicId) payload.TopicID = Number(newTopicId);
+            axios.post("/api/topics/addTopic", payload)
+              .then(res => {
+                setTopics(prev => [...prev, res.data]);
+                setNewTopicName("");
+                setNewTopicId("");
+                setIsAddTopicOpen(false);
+              });
+          }}
         />
       </Popup>
       {/* Edit Topic Popup */}
@@ -181,48 +222,107 @@ export default function ManageContent() {
       </Popup>
       {/* Practice Content Popup (table and add content) */}
       <Popup isOpen={isTopicPopupOpen} onClose={() => setIsTopicPopupOpen(false)} header={selectedTopic?.TopicName || "תוכן נושא"}>
-        <div className={styles.table} style={{ marginBottom: 8 }}>
-          <table style={{ width: "100%" }}>
-            <thead>
-              <tr>
-                <th>תמונה</th>
-                <th>אפשרויות תשובה</th>
-                <th>תשובה נכונה</th>
-                <th>מחיקה</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(practiceContent[selectedTopic?.TopicID] || []).map(content => (
-                <tr key={content.ExerciseID}>
-                  <td>
-                    {content.ContentType === "image" && (
-                      <img src={content.ContentValue} alt="img" style={{ maxWidth: 80, maxHeight: 60, borderRadius: 8 }} />
-                    )}
-                  </td>
-                  <td>
-                    {(content.AnswerOptions || []).map((opt, i) => (
-                      <div key={i}>{String.fromCharCode(65 + i)}. {opt}</div>
-                    ))}
-                  </td>
-                  <td>{content.CorrectAnswer}</td>
-                  <td>
-                    <button className={styles.smallButton} onClick={() => handleDeleteContent(content.ExerciseID, selectedTopic.TopicID)}>מח</button>
-                  </td>
+        <div className={`${styles.prominentPopup} ${styles.popupLarge}`}>
+          <div className={styles.tableWrapper}>
+            <table className={styles.tableFullWidth}>
+              <thead>
+                <tr>
+                  <th>תמונה</th>
+                  <th>אפשרויות תשובה</th>
+                  <th>תשובה נכונה</th>
+                  <th>מחיקה</th>
                 </tr>
-              ))}
-              {(practiceContent[selectedTopic?.TopicID] || []).length === 0 && (
-                <tr><td colSpan="4">אין תוכן</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {(practiceContent[selectedTopic?.TopicID] || []).map(content => (
+                  <tr key={content.ExerciseID}>
+                    <td>
+                      {content.ContentType === "image" && (
+                        <img src={content.ContentValue} alt="img" style={{ maxWidth: 80, maxHeight: 60, borderRadius: 8 }} />
+                      )}
+                    </td>
+                    <td>
+                      {(content.AnswerOptions || []).map((opt, i) => (
+                        <div key={i}>{String.fromCharCode(65 + i)}. {opt}</div>
+                      ))}
+                    </td>
+                    <td>{content.CorrectAnswer}</td>
+                    <td>
+                      <button className={styles.smallButton} onClick={() => handleDeleteContent(content.ExerciseID, selectedTopic.TopicID)}>מחק</button>
+                    </td>
+                  </tr>
+                ))}
+                {(practiceContent[selectedTopic?.TopicID] || []).length === 0 && (
+                  <tr><td colSpan="4">אין תוכן</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <button className={styles.addButton} onClick={() => setIsAddContentPopupOpen(true)}>הוסף תוכן</button>
+          {/* Add Practice Content Popup (nested) */}
+          <PracticeContent
+            topic={selectedTopic}
+            isOpen={isAddContentPopupOpen}
+            onClose={() => setIsAddContentPopupOpen(false)}
+          />
         </div>
-        <button className={styles.addButton} onClick={() => setIsAddContentPopupOpen(true)}>הוסף תוכן</button>
-        {/* Add Practice Content Popup (nested) */}
-        <PracticeContent
-          topic={selectedTopic}
-          isOpen={isAddContentPopupOpen}
-          onClose={() => setIsAddContentPopupOpen(false)}
+      </Popup>
+      {/* Delete Topic Confirmation Popup */}
+      <Popup isOpen={deleteConfirm.open} onClose={() => setDeleteConfirm({ open: false, topic: null })} header="אישור מחיקה">
+        <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+          <div style={{ fontSize: 18, marginBottom: 18 }}>
+            האם אתה בטוח שברצונך למחוק את הנושא "{deleteConfirm.topic?.TopicName}"?
+          </div>
+          <button
+            className={styles.deleteButtonLarge}
+            style={{ marginLeft: 8 }}
+            onClick={() => {
+              handleDeleteTopic(deleteConfirm.topic.TopicID);
+              setDeleteConfirm({ open: false, topic: null });
+            }}
+          >מחק</button>
+        </div>
+      </Popup>
+      {/* Add Course Popup */}
+      <Popup isOpen={isAddCourseOpen} onClose={() => setIsAddCourseOpen(false)} header="הוסף קורס חדש">
+        <Form
+          inputs={[{
+            label: "שם קורס",
+            type: "text",
+            name: "course",
+            value: newCourseName,
+            onChange: (e) => setNewCourseName(e.target.value),
+          }]}
+          onSubmit={() => {
+            if (!newCourseName.trim()) return;
+            axios.post("/api/courses/addCourse", { CourseName: newCourseName })
+              .then(res => {
+                setCourses(prev => [...prev, res.data]);
+                setNewCourseName("");
+                setIsAddCourseOpen(false);
+              });
+          }}
         />
+      </Popup>
+      {/* Delete Course Confirmation Popup */}
+      <Popup isOpen={deleteCourseConfirm.open} onClose={() => setDeleteCourseConfirm({ open: false, course: null })} header="אישור מחיקת קורס">
+        <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+          <div style={{ fontSize: 18, marginBottom: 18 }}>
+            האם אתה בטוח שברצונך למחוק את הקורס "{deleteCourseConfirm.course?.CourseName}"?
+          </div>
+          <button
+            className={styles.deleteButtonLarge}
+            style={{ marginLeft: 8 }}
+            onClick={() => {
+              axios.delete(`/api/courses/deleteCourse/${deleteCourseConfirm.course.CourseID}`)
+                .then(() => {
+                  setCourses(prev => prev.filter(c => c.CourseID !== deleteCourseConfirm.course.CourseID));
+                  if (selectedCourse === deleteCourseConfirm.course.CourseID) setSelectedCourse(null);
+                  setDeleteCourseConfirm({ open: false, course: null });
+                });
+            }}
+          >מחק</button>
+        </div>
       </Popup>
     </div>
   );

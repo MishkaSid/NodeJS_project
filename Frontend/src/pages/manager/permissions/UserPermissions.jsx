@@ -154,6 +154,12 @@ export default function UserPermissions() {
           );
         } else {
           setUsers((prev) => [...prev, values]);
+          setPopupConfig({
+            title: "הצלחה",
+            message: "המשתמש נוסף בהצלחה!",
+            confirmLabel: "סגור",
+            onConfirm: () => setPopupConfig(null),
+          });
         }
         setIsFormOpen(false);
       })

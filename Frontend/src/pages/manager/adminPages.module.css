@@ -71,19 +71,24 @@
 
 /* ✅ Restored your nice add button */
 .addButton {
-  background-color: var(--clr-blue-2);
-  color: white;
-  padding: 2rem;
+  padding: 1.8rem 2.5rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 0.9rem;
+  background-color: var(--clr-blue-2);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.5rem;
   cursor: pointer;
-  font-weight: bold;
-  box-shadow: 4px 8px 10px -3px rgba(0, 0, 0, 0.356);
-  transition: background-color 0.3s ease;
+  margin-bottom: 1rem;
+  margin-right: 0.5rem;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(79,140,255,0.12);
+  letter-spacing: 0.5px;
 }
 
 .addButton:hover {
-  background-color: #1e63d5;
+  background-color: #2563eb;
+  box-shadow: 0 4px 16px rgba(79,140,255,0.18);
 }
 
 .sort {
@@ -203,20 +208,22 @@ noResults td {
 }
 
 .smallButton {
-  padding: 0.25rem 0.7rem;
-  font-size: 0.95rem;
-  border-radius: 4px;
+  padding: 0.32rem 1.1rem;
+  font-size: 1.05rem;
+  border-radius: 6px;
   border: none;
   background-color: var(--clr-blue-2);
   color: #fff;
   font-weight: 600;
   cursor: pointer;
-  margin-left: 6px;
+  margin-left: 8px;
   margin-right: 2px;
-  transition: background 0.2s;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(79,140,255,0.08);
 }
 .smallButton:hover {
   background-color: #1e63d5;
+  box-shadow: 0 4px 16px rgba(79,140,255,0.12);
 }
 
 @media (max-width: 768px) {
@@ -237,5 +244,113 @@ noResults td {
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+.topicsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.2rem;
+  margin-bottom: 2.5rem;
+}
+.topicCardContainer {
+  min-width: 320px;
+  max-width: 370px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: #f7faff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(79,140,255,0.08);
+  padding: 1.2rem 1rem 0.7rem 1rem;
+  transition: box-shadow 0.2s;
+}
+.topicCardContainer:hover {
+  box-shadow: 0 6px 24px rgba(79,140,255,0.16);
+}
+.topicActions {
+  margin-top: 16px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 18px;
+  justify-content: flex-end;
+}
+.editButtonLarge {
+  padding: 0.7rem 2.1rem;
+  font-size: 1.15rem;
+  border-radius: 0.7rem;
+  border: none;
+  background-color: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+}
+.editButtonLarge:hover {
+  background-color: #174ea6;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.12);
+}
+.deleteButtonLarge {
+  padding: 0.7rem 2.1rem;
+  font-size: 1.15rem;
+  border-radius: 0.7rem;
+  border: none;
+  background-color: #e53935;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(229,57,53,0.08);
+}
+.deleteButtonLarge:hover {
+  background-color: #b71c1c;
+  box-shadow: 0 4px 16px rgba(229,57,53,0.12);
+}
+.tableWrapper {
+  margin-bottom: 12px;
+}
+.tableFullWidth {
+  width: 100%;
+}
+
+.prominentPopup {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 8px 32px rgba(79,140,255,0.18), 0 2px 8px rgba(0,0,0,0.10);
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  min-width: 540px;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+}
+.popupLarge {
+  min-width: 540px;
+  max-width: 900px;
+}
+
+.coursesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  margin-top: 1.5rem;
+}
+.courseItem {
+  display: flex;
+  align-items: center;
+  background: #f7faff;
+  border-radius: 0.8rem;
+  box-shadow: 0 2px 8px rgba(79,140,255,0.08);
+  padding: 0.7rem 1.2rem;
+  min-width: 220px;
+  max-width: 350px;
+  gap: 1.2rem;
+}
+.courseName {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #2563eb;
+  flex: 1;
+  text-align: right;
 }
 

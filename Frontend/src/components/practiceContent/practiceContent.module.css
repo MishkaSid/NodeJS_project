@@ -146,6 +146,16 @@
 .answerOptionRadioSmall {
   width: 16px;
   height: 16px;
+  margin-left: 8px;
+  accent-color: #4f8cff;
+  box-shadow: none !important;
+  outline: none;
+  border: none;
+}
+.answerOptionRadioSmall:focus, .answerOptionRadioSmall:checked {
+  box-shadow: none !important;
+  outline: none;
+  border: none;
 }
 .answerOptionLabel {
   margin-left: 8px;
@@ -153,6 +163,7 @@
   font-size: 1.1rem;
 }
 .answerOptionRemove {
+  max-width: 3rem;
   margin-right: 4px;
   color: #e53935;
   background: none;
